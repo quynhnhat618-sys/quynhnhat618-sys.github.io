@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f3f0e8">
+<title>The Human Algorithm — Dinh Ngoc Nhat Quynh</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;1,500;1,600&display=swap');
+:root{
+  --paper:#f3f0e8;--ink:#20251f;--muted:#70756d;--line:#d7d3c9;
+  --coral:#c96b4c;--moss:#87957e;--blue:#718b96;--white:#fffdf8;
+  --serif:"Playfair Display",Georgia,serif;--sans:"DM Sans",Arial,sans-serif;--mono:"DM Mono",monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);min-height:100vh}
+button{font:inherit}
+.shell{max-width:1500px;margin:auto;padding:0 clamp(20px,5.2vw,82px)}
+.topbar{height:76px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);font:10px var(--mono);letter-spacing:.11em;text-transform:uppercase}
+.brand{display:flex;align-items:center;gap:12px}
+.brand-mark{width:27px;height:27px;border:1px solid var(--ink);border-radius:50%;display:grid;place-items:center;font:italic 17px var(--serif)}
+.topmeta{display:flex;gap:26px;color:var(--muted)}
+.topmeta span:last-child{color:var(--coral)}
+.hero{padding:clamp(55px,8vw,105px) 0 48px;display:grid;grid-template-columns:1.15fr .85fr;gap:6vw;align-items:end}
+.eyebrow,.micro{font:10px var(--mono);letter-spacing:.13em;text-transform:uppercase;color:var(--muted)}
+.eyebrow:before{content:"";display:inline-block;width:25px;height:1px;background:var(--coral);vertical-align:middle;margin-right:10px}
+h1{font:500 clamp(58px,8.5vw,124px)/.9 var(--serif);letter-spacing:-.065em;margin:20px 0 0;max-width:850px}
+h1 em{font-weight:500;color:var(--coral)}
+.hero-copy{max-width:450px;margin:0 0 8px;padding:0 0 4px 22px;border-left:1px solid var(--line);font-size:15px;line-height:1.8;color:#555d55}
+.hero-copy strong{color:var(--ink);font-weight:600}
+.hero-rail{display:flex;justify-content:space-between;gap:20px;align-items:center;padding:15px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin-bottom:30px}
+.hero-rail .micro{color:var(--ink)}
+.rail-note{font:9px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid var(--line);margin-bottom:40px}
+.stat{padding:17px 18px 19px 0;border-right:1px solid var(--line)}
+.stat:not(:first-child){padding-left:20px}
+.stat:last-child{border-right:0}
+.stat strong{display:block;font:500 clamp(23px,3vw,35px)/1 var(--serif);letter-spacing:-.04em}
+.stat span{display:block;margin-top:8px;font:9px var(--mono);letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.explorer{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(300px,.65fr);gap:22px;align-items:stretch;padding-bottom:75px}
+.graph-panel,.detail-panel{background:var(--white);border:1px solid var(--line);min-width:0}
+.panel-head{height:56px;padding:0 20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:12px}
+.panel-head .micro{color:var(--ink)}
+.live{font:9px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.live:before{content:"";display:inline-block;width:6px;height:6px;background:var(--moss);border-radius:50%;margin:0 9px 1px 0}
+.graph-wrap{position:relative;min-height:555px;background-image:radial-gradient(#d8d4ca .7px,transparent .7px);background-size:19px 19px}
+#network{display:block;width:100%;height:555px;overflow:visible}
+.edge{stroke:#c9c8bd;stroke-width:1.25;fill:none;opacity:.75;transition:opacity .22s,stroke .22s,stroke-width .22s}
+.edge.active{stroke:var(--coral);stroke-width:2.4;opacity:1}
+.edge.dim{opacity:.12}
+.node{cursor:pointer;outline:none;transition:opacity .2s}
+.node circle.halo{fill:var(--paper);stroke:var(--ink);stroke-width:1.2;transition:all .2s}
+.node circle.core-dot{fill:var(--coral);stroke:none}
+.node text{font:9px var(--mono);letter-spacing:.04em;fill:var(--ink);pointer-events:none}
+.node .sub{font-size:7px;fill:var(--muted)}
+.node.selected circle.halo{fill:var(--coral);stroke:var(--coral);r:9}
+.node.selected circle.core-dot{fill:var(--white)}
+.node:focus-visible circle.halo{stroke:var(--coral);stroke-width:3}
+.node.dim{opacity:.18}
+.core circle{fill:var(--ink);stroke:var(--ink)}
+.core .word{font:italic 17px var(--serif);fill:var(--white);text-anchor:middle}
+.core .small{font:7px var(--mono);fill:#d9d5cb;letter-spacing:.13em;text-anchor:middle}
+.graph-caption{position:absolute;left:18px;right:18px;bottom:15px;display:flex;justify-content:space-between;gap:12px;font:8px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.filters{display:flex;flex-wrap:wrap;gap:7px;padding:15px 18px;border-top:1px solid var(--line)}
+.filter{border:1px solid var(--line);background:transparent;color:var(--muted);border-radius:30px;padding:8px 11px;font:8px var(--mono);letter-spacing:.08em;text-transform:uppercase;cursor:pointer;min-height:34px;transition:background .2s,color .2s,border-color .2s}
+.filter[aria-pressed="true"],.filter:hover{background:var(--ink);border-color:var(--ink);color:var(--white)}
+.detail-panel{display:flex;flex-direction:column;min-height:610px}
+.detail-content{padding:27px 27px 24px;display:flex;flex-direction:column;flex:1}
+.detail-index{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:34px}
+.detail-index .index{font:10px var(--mono);letter-spacing:.1em;color:var(--coral)}
+.category{font:8px var(--mono);letter-spacing:.09em;text-transform:uppercase;border:1px solid var(--line);padding:7px 9px;color:var(--muted)}
+.detail-title{font:500 clamp(30px,3.1vw,43px)/1.02 var(--serif);letter-spacing:-.04em;margin:0 0 14px}
+.detail-meta{font:9px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:22px}
+.detail-desc{font-size:13px;line-height:1.85;color:#555d55;margin:0 0 26px}
+.facts{border-top:1px solid var(--line);margin-top:auto}
+.fact{display:grid;grid-template-columns:78px 1fr;gap:12px;padding:13px 0;border-bottom:1px solid var(--line);font-size:11px;line-height:1.6}
+.fact-label{font:8px var(--mono);letter-spacing:.09em;text-transform:uppercase;color:var(--muted);padding-top:3px}
+.fact-value{color:var(--ink)}
+.related{display:flex;flex-wrap:wrap;gap:6px;margin-top:16px}
+.related button{border:1px solid var(--line);background:transparent;padding:7px 9px;font:8px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--coral);cursor:pointer}
+.related button:hover{background:#f7eee8}
+.detail-footer{display:flex;justify-content:space-between;align-items:center;gap:12px;border-top:1px solid var(--line);padding:16px 25px;font:9px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.detail-footer button{border:0;background:none;color:var(--coral);cursor:pointer;padding:7px;font:inherit}
+.detail-footer button:focus-visible,.filter:focus-visible,.related button:focus-visible{outline:2px solid var(--coral);outline-offset:3px}
+.mobile-index{display:none}
+.note-band{border-top:1px solid var(--ink);padding:42px 0 60px;display:grid;grid-template-columns:1fr 1fr;gap:7vw}
+.note-band h2{font:500 clamp(34px,4.2vw,58px)/1.02 var(--serif);letter-spacing:-.045em;margin:12px 0}
+.note-band p{font-size:13px;line-height:1.85;color:var(--muted);max-width:500px}
+.principles{display:grid;grid-template-columns:1fr 1fr;gap:0 22px;align-content:start}
+.principle{padding:15px 0;border-bottom:1px solid var(--line)}
+.principle b{display:block;font:9px var(--mono);letter-spacing:.09em;text-transform:uppercase;margin-bottom:7px}
+.principle span{font-size:11px;line-height:1.6;color:var(--muted)}
+.footer{border-top:1px solid var(--line);padding:19px 0 30px;display:flex;justify-content:space-between;gap:20px;font:8px var(--mono);letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+@media(max-width:900px){
+ .hero{grid-template-columns:1fr;gap:28px}
+ .hero-copy{max-width:620px}
+ .explorer{grid-template-columns:1fr}
+ .detail-panel{min-height:470px}
+ .note-band{grid-template-columns:1fr;gap:25px}
+}
+@media(max-width:600px){
+ .topbar{height:64px}.topmeta{gap:12px}.topmeta span:first-child{display:none}
+ .hero{padding:48px 0 35px}
+ h1{font-size:clamp(54px,15vw,84px)}
+ .hero-copy{font-size:14px;padding-left:16px}
+ .stats{grid-template-columns:repeat(2,1fr);margin-bottom:28px}
+ .stat{padding:13px 12px 14px 0}.stat:nth-child(2){border-right:0}.stat:nth-child(3){padding-left:0}.stat:nth-child(4){border-right:0}
+ .graph-wrap{display:none}
+ .mobile-index{display:grid;grid-template-columns:1fr 1fr;gap:0;border-top:1px solid var(--line)}
+ .mobile-node{min-height:76px;border:0;border-right:1px solid var(--line);border-bottom:1px solid var(--line);background:transparent;text-align:left;padding:13px 14px;cursor:pointer}
+ .mobile-node:nth-child(2n){border-right:0}
+ .mobile-node span{display:block;font:8px var(--mono);letter-spacing:.08em;color:var(--coral);margin-bottom:7px}
+ .mobile-node strong{font:500 17px var(--serif)}
+ .filters{padding:13px}
+ .detail-content{padding:22px 19px}
+ .detail-panel{min-height:480px}
+ .note-band{padding:35px 0 48px}
+ .principles{grid-template-columns:1fr 1fr;gap:0 14px}
+ .footer{flex-direction:column}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="shell">
+<header class="topbar">
+  <div class="brand"><span class="brand-mark">q</span><span>Field / 001</span></div>
+  <div class="topmeta"><span>Personal research archive</span><span>Prototype 01</span><span>Interactive identity</span></div>
+</header>
+<main>
+<section class="hero">
+  <div>
+    <div class="eyebrow">An evolving index · Dinh Ngoc Nhat Quynh</div>
+    <h1>The human<br><em>algorithm.</em></h1>
+  </div>
+  <p class="hero-copy">A map of how <strong>curiosity becomes useful</strong> — through mathematical thinking, experiments, shared learning, and projects designed around people. Not a timeline. A set of ideas that keep finding one another.</p>
+</section>
+<div class="hero-rail"><span class="micro">Eight threads · One connected practice</span><span class="rail-note">Select a point to reveal its story ↘</span></div>
+<div class="stats" aria-label="Selected academic indicators">
+  <div class="stat"><strong>9.7</strong><span>Grade 10 GPA</span></div>
+  <div class="stat"><strong>9.7</strong><span>Grade 11 GPA</span></div>
+  <div class="stat"><strong>99%</strong><span>AS Mathematics</span></div>
+  <div class="stat"><strong>40+</strong><span>Maths Club members</span></div>
+</div>
+
+<section class="explorer" aria-label="Interactive map of experiences">
+  <div class="graph-panel">
+    <div class="panel-head"><span class="micro">01 / Connection map</span><span class="live">Choose a node</span></div>
+    <div class="graph-wrap">
+      <svg id="network" viewBox="0 0 760 600" role="group" aria-label="Eight connected experience nodes. Select a node to explore.">
+        <g id="edges">
+          <path class="edge" data-a="academic" data-b="research" d="M165 125 Q280 35 380 82"/>
+          <path class="edge" data-a="academic" data-b="club" d="M165 125 Q60 235 120 365"/>
+          <path class="edge" data-a="research" data-b="iot" d="M380 82 Q535 40 625 150"/>
+          <path class="edge" data-a="iot" data-b="color" d="M625 150 Q760 250 655 405"/>
+          <path class="edge" data-a="club" data-b="council" d="M120 365 Q220 510 330 510"/>
+          <path class="edge" data-a="club" data-b="seia" d="M120 365 Q360 300 610 365"/>
+          <path class="edge" data-a="council" data-b="giver" d="M330 510 Q470 590 565 500"/>
+          <path class="edge" data-a="color" data-b="giver" d="M655 405 Q655 465 565 500"/>
+          <path class="edge" data-a="academic" data-b="seia" d="M165 125 Q400 180 610 365"/>
+          <path class="edge" data-a="research" data-b="giver" d="M380 82 Q470 300 565 500"/>
+        </g>
+        <g class="core" transform="translate(380 300)">
+          <circle r="48"/><text class="word" y="-3">human</text><text class="small" y="14">ALGORITHM</text>
+        </g>
+        <g class="node selected" data-id="academic" tabindex="0" role="button" aria-label="Academic foundations" transform="translate(165 125)">
+          <circle class="halo" r="7"/><circle class="core-dot" r="2.4"/><text x="-7" y="-20">ACADEMICS</text><text class="sub" x="-7" y="-7">01 / THINK</text>
+        </g>
+        <g class="node" data-id="research" tabindex="0" role="button" aria-label="Science and engineering fair and IoT research" transform="translate(380 82)">
+          <circle class="halo" r="7"/><circle class="core-dot" r="2.4"/><text x="14" y="-1">RESEARCH</text><text class="sub" x="14" y="12">02 / EXPERIMENT</text>
+        </g>
+        <g class="node" data-id="iot" tabindex="0" role="button" aria-label="IoT water-leak sensor project" transform="translate(625 150)">
+          <circle class="halo" r="7"/><circle class="core-dot" r="2.4"/><text x="14" y="-17">IOT SENSOR</text><text class="sub" x="14" y="-4">03 / BUILD</text>
+        </g>
+        <g class="node" data-id="club" tabindex="0" role="button" aria-label="Mathematics Club leadership" transform="translate(120 365)">
+          <circle class="halo" r="7"/><circle class="core-dot" r="2.4"/><text x="-7" y="-20">MATHS CLUB</text><text class="sub" x="-7" y="-7">04 / MENTOR</text>
+        </g>
+        <g class="node" data-id="council" tabindex="0" role="button" aria-label="Student Council Finance Committee" transform="translate(330 510)">
+          <circle class="halo" r="7"/><circle class="core-dot" r="2.4"/><text x="-7" y="25">STUDENT COUNCIL</text><text class="sub" x="-7" y="38">05 / STEWARD</text>
+        </g>
+        <g class="node" data-id="seia" tabindex="0" role="button" aria-label="SEIA business club" transform="translate(610 365)">
+          <circle class="halo" r="7"/><circle class="core-dot" r="2.4"/><text x="14" y="-19">SEIA</text><text class="sub" x="14" y="-6">06 / STRATEGISE</text>
+        </g>
+        <g class="node" data-id="color" tabindex="0" role="button" aria-label="Color Your Dream inclusive design project" transform="translate(655 405)">
+          <circle class="halo" r="7"/><circle class="core-dot" r="2.4"/><text x="14" y="5">COLOR YOUR DREAM</text><text class="sub" x="14" y="18">07 / INCLUDE</text>
+        </g>
+        <g class="node" data-id="giver" tabindex="0" role="button" aria-label="The Giver community initiative" transform="translate(565 500)">
+          <circle class="halo" r="7"/><circle class="core-dot" r="2.4"/><text x="14" y="4">THE GIVER</text><text class="sub" x="14" y="17">08 / CONNECT</text>
+        </g>
+      </svg>
+      <div class="graph-caption"><span>Lines indicate shared themes</span><span>Click · tap · tab + enter</span></div>
+    </div>
+    <div class="mobile-index" aria-label="Choose an experience">
+      <button class="mobile-node" data-mobile="academic"><span>01 / THINK</span><strong>Academics</strong></button>
+      <button class="mobile-node" data-mobile="research"><span>02 / EXPERIMENT</span><strong>Research</strong></button>
+      <button class="mobile-node" data-mobile="iot"><span>03 / BUILD</span><strong>IoT sensor</strong></button>
+      <button class="mobile-node" data-mobile="club"><span>04 / MENTOR</span><strong>Maths Club</strong></button>
+      <button class="mobile-node" data-mobile="council"><span>05 / STEWARD</span><strong>Student Council</strong></button>
+      <button class="mobile-node" data-mobile="seia"><span>06 / STRATEGISE</span><strong>SEIA</strong></button>
+      <button class="mobile-node" data-mobile="color"><span>07 / INCLUDE</span><strong>Color Your Dream</strong></button>
+      <button class="mobile-node" data-mobile="giver"><span>08 / CONNECT</span><strong>The Giver</strong></button>
+    </div>
+    <div class="filters" aria-label="Filter experiences">
+      <button class="filter" data-filter="all" aria-pressed="true">All threads</button>
+      <button class="filter" data-filter="academics" aria-pressed="false">Academics</button>
+      <button class="filter" data-filter="projects" aria-pressed="false">Projects</button>
+      <button class="filter" data-filter="leadership" aria-pressed="false">Leadership</button>
+      <button class="filter" data-filter="impact" aria-pressed="false">Social impact</button>
+    </div>
+  </div>
+
+  <aside class="detail-panel" aria-live="polite" aria-atomic="true">
+    <div class="panel-head"><span class="micro">02 / Selected thread</span><span class="micro" id="thread-count">01 — 08</span></div>
+    <div class="detail-content">
+      <div class="detail-index"><span class="index" id="detail-number">THREAD 01</span><span class="category" id="detail-category">ACADEMICS</span></div>
+      <h2 class="detail-title" id="detail-title">A foundation in patterns</h2>
+      <div class="detail-meta" id="detail-meta">VAS · ACADEMIC RECORD</div>
+      <p class="detail-desc" id="detail-desc">Mathematics is a recurring way of approaching questions: look for structure, test a pattern, and make a difficult problem more legible.</p>
+      <div class="facts">
+        <div class="fact"><span class="fact-label">Evidence</span><span class="fact-value" id="detail-evidence">Grade 10 GPA 9.7 · Grade 11 GPA 9.7 · AS Mathematics 99%</span></div>
+        <div class="fact"><span class="fact-label">Connection</span><span class="fact-value" id="detail-connection">A foundation for scientific experimentation and peer mentoring.</span></div>
+      </div>
+      <div class="related" id="related-links" aria-label="Related threads"></div>
+    </div>
+    <div class="detail-footer"><span>Follow another thread</span><button id="next-thread" type="button">Next node ↗</button></div>
+  </aside>
+</section>
+
+<section class="note-band">
+  <div>
+    <div class="eyebrow">A working philosophy</div>
+    <h2>Ideas matter<br>when they meet people.</h2>
+    <p>Across research, student leadership, and community projects, a recurring question appears: how can an idea become something another person can use, learn from, or take forward?</p>
+    <p class="micro">Selected additional notes: IELTS 7.0 · Top 10 finalist, ReThink Plastic Vietnam Idea Challenge 2024 · First Prize, VAS Community Programme · Volunteer, Harvard Model Congress Young Global Leaders Program.</p>
+  </div>
+  <div class="principles">
+    <div class="principle"><b>01 / Think</b><span>Look for structure. Ask better questions.</span></div>
+    <div class="principle"><b>02 / Experiment</b><span>Test ideas in practical settings.</span></div>
+    <div class="principle"><b>03 / Share</b><span>Make learning collaborative and accessible.</span></div>
+    <div class="principle"><b>04 / Connect</b><span>Design with people and their needs in mind.</span></div>
+  </div>
+</section>
+</main>
+<footer class="footer"><span>The Human Algorithm · Experimental prototype</span><span>A map, not a résumé · 2026</span></footer>
+</div>
+<script>
+const threads = {
+ academic:{n:"01",category:"Academics",title:"A foundation in patterns",meta:"VAS · Academic record",desc:"Mathematics is a recurring way of approaching questions: look for structure, test a pattern, and make a difficult problem more legible.",evidence:"Grade 10 GPA 9.7 · Grade 11 GPA 9.7 · IGCSE Mathematics A* · AS Mathematics a (99%) · AS Business a (87%) · AS Physics a (86%) · AS Computer Science b (76%)",connection:"A foundation for scientific experimentation, business case work, and peer mentoring.",group:"academics",links:["research","club","seia"]},
+ research:{n:"02",category:"Academics · Projects",title:"Learning by testing ideas",meta:"Secondary Student Science & Engineering Fair · 2024–25",desc:"A science-fair project turned a practical question into a research process. The work received recognition at both the school-level fair and the HCMC final round.",evidence:"Third Prize · Secondary Student Science and Engineering Fair; Second Prize · HCMC Final Round, SY 2024–25.",connection:"The research thread leads into the IoT water-leak sensor: a practical application of physics, embedded systems, and sustainability.",group:"academics",links:["academic","iot","giver"]},
+ iot:{n:"03",category:"Projects",title:"A sensor for a real-world problem",meta:"IoT · Remote water-leak detection",desc:"Led a research project developing an IoT-based sensor that detects water leaks remotely, bringing together physics, embedded systems, and Blynk technology to help prevent waste and damage.",evidence:"Second Prize · HCMC Final Round, Secondary Student Science and Engineering Fair, SY 2024–25.",connection:"A meeting point between analytical thinking, practical engineering, and environmental awareness.",group:"projects",links:["research","color","academic"]},
+ club:{n:"04",category:"Leadership",title:"Making mathematics collaborative",meta:"Mathematics Club · President & Head of Mentoring",desc:"Led a school mathematics club of more than 40 members, organised schedules and lessons, coached younger students, supported competition preparation, and introduced math-themed presentations at assemblies.",evidence:"40+ members · First Place, Team Round, Senior VAS Maths Competition, SY 2024–25.",connection:"Turns an individual academic interest into a shared learning environment built around confidence and curiosity.",group:"leadership",links:["academic","council","seia"]},
+ council:{n:"05",category:"Leadership",title:"Stewardship behind the scenes",meta:"Student Council · Finance Committee",desc:"Supported school-wide events through budgeting, fundraising, expenditure monitoring, and coordination with different departments—balancing creative plans with practical constraints.",evidence:"Finance Committee Member · Student Council.",connection:"A practical expression of organisation, accountability, and teamwork.",group:"leadership",links:["club","giver","seia"]},
+ seia:{n:"06",category:"Leadership",title:"Thinking through business cases",meta:"SEIA · Junior Officer",desc:"Contributed to a business-focused club that applied theory to real-world case studies. Organised activities and helped train members in teamwork, critical thinking, presentation, and competition preparation.",evidence:"Junior Officer · SEIA business-focused club.",connection:"Brings analytical thinking into collaborative problem-solving and communication.",group:"leadership",links:["academic","club","council"]},
+ color:{n:"07",category:"Social impact",title:"Designing for different ways of seeing",meta:"Color Your Dream · Inclusive learning project",desc:"Helped develop two colour-set models for visually impaired students: one using sound cues associated with colour moods, and another using distinct shapes for recognition. The project paired product development with finance oversight.",evidence:"50 colour sets and art supplies donated to a local school.",connection:"Shows how design can respond to different needs and make creative learning more accessible.",group:"impact",links:["iot","giver","research"]},
+ giver:{n:"08",category:"Social impact",title:"Making room for difficult conversations",meta:"The Giver · Non-profit awareness initiative",desc:"Contributed to a community awareness initiative focused on sexual abuse. The team organised talks where psychologists shared knowledge and guidance with students, alongside separate community-bonding activities. Served as Head of Finance.",evidence:"Head of Finance · Fundraising and resource coordination for the initiative.",connection:"Connects responsible planning with empathy, communication, and community support.",group:"impact",links:["council","color","research"]}
+};
+const order=Object.keys(threads);
+const nodes=[...document.querySelectorAll(".node")],edges=[...document.querySelectorAll(".edge")],filters=[...document.querySelectorAll(".filter")];
+let selected="academic",activeFilter="all";
+const el=id=>document.getElementById(id);
+function selectThread(id){
+ if(!threads[id])return;
+ selected=id;const d=threads[id];
+ el("detail-number").textContent="THREAD "+d.n;
+ el("detail-category").textContent=d.category.toUpperCase();
+ el("detail-title").textContent=d.title;
+ el("detail-meta").textContent=d.meta;
+ el("detail-desc").textContent=d.desc;
+ el("detail-evidence").textContent=d.evidence;
+ el("detail-connection").textContent=d.connection;
+ el("thread-count").textContent=d.n+" — 08";
+ nodes.forEach(node=>{
+   const is=node.dataset.id===id,linked=d.links.includes(node.dataset.id);
+   node.classList.toggle("selected",is);
+   node.classList.toggle("dim",activeFilter!=="all"&&!visibleInFilter(node.dataset.id)||activeFilter==="all"&&!is&&!linked);
+ });
+ edges.forEach(edge=>{
+   const active=edge.dataset.a===id||edge.dataset.b===id;
+   edge.classList.toggle("active",active);
+   edge.classList.toggle("dim",!active);
+ });
+ const related=el("related-links");related.replaceChildren();
+ d.links.forEach(key=>{
+   const b=document.createElement("button");b.type="button";b.textContent=threads[key].title;b.addEventListener("click",()=>selectThread(key));related.appendChild(b);
+ });
+}
+function visibleInFilter(id){return activeFilter==="all"||threads[id].group===activeFilter||(activeFilter==="projects"&&id==="research");}
+function applyFilter(filter){
+ activeFilter=filter;
+ filters.forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.filter===filter)));
+ nodes.forEach(node=>{
+   const show=visibleInFilter(node.dataset.id);
+   node.classList.toggle("dim",!show);
+   node.style.pointerEvents=show?"auto":"none";
+   node.setAttribute("aria-hidden",String(!show));
+ });
+ edges.forEach(edge=>{
+   const show=visibleInFilter(edge.dataset.a)&&visibleInFilter(edge.dataset.b);
+   edge.style.opacity=show?"":"0.08";
+ });
+ if(!visibleInFilter(selected)){
+   const next=order.find(id=>visibleInFilter(id));
+   if(next)selectThread(next);
+ }else{
+   nodes.forEach(node=>node.classList.toggle("dim",!visibleInFilter(node.dataset.id)));
+ }
+}
+nodes.forEach(node=>{
+ node.addEventListener("click",()=>selectThread(node.dataset.id));
+ node.addEventListener("keydown",event=>{
+   if(event.key==="Enter"||event.key===" "){event.preventDefault();selectThread(node.dataset.id);}
+ });
+});
+document.querySelectorAll("[data-mobile]").forEach(button=>button.addEventListener("click",()=>selectThread(button.dataset.mobile)));
+filters.forEach(button=>button.addEventListener("click",()=>applyFilter(button.dataset.filter)));
+el("next-thread").addEventListener("click",()=>{
+ let candidates=order.filter(visibleInFilter);let i=candidates.indexOf(selected);selectThread(candidates[(i+1)%candidates.length]);
+});
+selectThread("academic");
+</script>
+</body>
+</html>
